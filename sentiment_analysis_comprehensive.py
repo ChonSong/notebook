@@ -150,21 +150,156 @@ def download_sentiment_data():
     raw_df = download_exorde_sample()
     
     if raw_df is None:
-        print("Failed to download Exorde dataset. Creating fallback synthetic dataset...")
-        # Fallback to a minimal synthetic dataset if download fails
-        fallback_data = [
-            ("This is a great product, very satisfied!", 0.8),
-            ("Terrible quality, completely disappointed", -0.8),
-            ("Average product, nothing special", 0.0),
-            ("Excellent service and amazing quality!", 0.9),
-            ("Poor design and functionality issues", -0.7),
-            ("Okay for the price, meets expectations", 0.1),
-        ] * 100  # Repeat to create a larger dataset
+        print("Failed to download Exorde dataset. Creating comprehensive synthetic dataset...")
+        # Create a much larger and more diverse synthetic dataset
+        fallback_data = []
         
+        # Base sentiment templates with more variety
+        positive_templates = [
+            "This is an amazing product, highly recommend it!",
+            "Excellent quality and great customer service",
+            "Love this item, exceeded my expectations",
+            "Outstanding value for money, will buy again",
+            "Perfect product, exactly what I needed",
+            "Fantastic experience, 5 stars!",
+            "Great quality product, very satisfied",
+            "Impressive performance and reliability",
+            "Wonderful service and fast delivery",
+            "Best purchase I've made in a long time",
+            "Superb quality, worth every penny",
+            "Amazing features and easy to use",
+            "Brilliant product design and functionality",
+            "Exceptional customer support team",
+            "Top-notch quality and craftsmanship",
+            "Incredible value, highly satisfied",
+            "Outstanding performance, works perfectly",
+            "Excellent build quality and durability",
+            "Fantastic user experience overall",
+            "Great product at an affordable price"
+        ]
+        
+        negative_templates = [
+            "Terrible quality, completely disappointed",
+            "Poor design and functionality issues",
+            "Worst purchase ever, total waste of money",
+            "Cheaply made and breaks easily",
+            "Horrible customer service experience",
+            "Defective product, doesn't work at all",
+            "Overpriced for such poor quality",
+            "Misleading description, not as advertised",
+            "Faulty product arrived damaged",
+            "Terrible build quality, fell apart quickly",
+            "Disappointing performance, very slow",
+            "Poor materials used in construction",
+            "Awful user interface, hard to use",
+            "Broken on arrival, poor packaging",
+            "Unreliable product, stops working frequently",
+            "Bad design choices throughout",
+            "Frustrating experience from start to finish",
+            "Low quality materials and workmanship",
+            "Difficult to use and poorly designed",
+            "Not worth the money, very disappointed"
+        ]
+        
+        neutral_templates = [
+            "Average product, nothing special",
+            "Okay for the price, meets expectations",
+            "Decent quality, could be better",
+            "Standard product, works as expected",
+            "Reasonable option for basic needs",
+            "Satisfactory performance overall",
+            "Adequate quality for the price point",
+            "Good enough for occasional use",
+            "Fair value for what you get",
+            "Typical quality, nothing outstanding",
+            "Acceptable performance and features",
+            "Basic functionality, meets requirements",
+            "Standard quality product offering",
+            "Moderate performance, room for improvement",
+            "Suitable for casual users",
+            "Ordinary product with standard features",
+            "Passable quality for the price",
+            "Regular performance, as expected",
+            "Reasonable choice for budget-conscious buyers",
+            "Standard offering in this category"
+        ]
+        
+        # Generate variations with modifiers and contexts
+        contexts = [
+            "smartphone", "laptop", "headphones", "shoes", "book", "movie", "restaurant", 
+            "hotel", "car", "service", "app", "website", "game", "software", "course",
+            "food", "clothing", "electronics", "furniture", "appliance"
+        ]
+        
+        modifiers = [
+            "really", "extremely", "quite", "very", "somewhat", "pretty", "totally",
+            "absolutely", "completely", "definitely", "certainly", "perhaps", "maybe"
+        ]
+        
+        # Generate positive samples
+        for template in positive_templates:
+            for i in range(25):  # 25 variations per template
+                text = template
+                if np.random.random() > 0.5:
+                    modifier = np.random.choice(modifiers)
+                    text = f"{modifier} {text.lower()}"
+                if np.random.random() > 0.7:
+                    context = np.random.choice(contexts)
+                    text = f"The {context} was {text.lower()}"
+                
+                sentiment = np.random.uniform(0.6, 1.0)  # Strong positive
+                fallback_data.append((text, sentiment))
+        
+        # Generate negative samples  
+        for template in negative_templates:
+            for i in range(25):  # 25 variations per template
+                text = template
+                if np.random.random() > 0.5:
+                    modifier = np.random.choice(modifiers)
+                    text = f"{modifier} {text.lower()}"
+                if np.random.random() > 0.7:
+                    context = np.random.choice(contexts)
+                    text = f"The {context} was {text.lower()}"
+                
+                sentiment = np.random.uniform(-1.0, -0.6)  # Strong negative
+                fallback_data.append((text, sentiment))
+                
+        # Generate neutral samples
+        for template in neutral_templates:
+            for i in range(15):  # 15 variations per template  
+                text = template
+                if np.random.random() > 0.5:
+                    modifier = np.random.choice(modifiers)
+                    text = f"{modifier} {text.lower()}"
+                if np.random.random() > 0.7:
+                    context = np.random.choice(contexts)
+                    text = f"The {context} was {text.lower()}"
+                
+                sentiment = np.random.uniform(-0.15, 0.15)  # Neutral range
+                fallback_data.append((text, sentiment))
+        
+        # Add some mixed sentiment examples with negation and complex structures
+        complex_examples = [
+            ("I thought this would be terrible, but it's actually quite good", 0.6),
+            ("Not bad at all, better than expected", 0.4),
+            ("Could have been worse, but still not great", -0.3),
+            ("Started well but ended up being disappointing", -0.5),
+            ("Mixed feelings about this purchase", 0.0),
+            ("Has some good points but also major flaws", -0.1),
+            ("Better than the previous version but still lacking", 0.2),
+            ("Works fine most of the time, occasional issues", 0.1),
+            ("Good value despite some minor problems", 0.3),
+            ("Not perfect but gets the job done", 0.2)
+        ] * 50  # Repeat for more examples
+        
+        fallback_data.extend(complex_examples)
+        
+        # Shuffle and create DataFrame
+        np.random.shuffle(fallback_data)
         df = pd.DataFrame(fallback_data, columns=['original_text', 'sentiment'])
         df = df.sample(frac=1, random_state=42).reset_index(drop=True)
         df.to_csv('exorde_raw_sample.csv', index=False)
-        print(f"Created fallback dataset with {len(df)} samples")
+        print(f"Created comprehensive synthetic dataset with {len(df)} samples")
         return df
     
     # Process the downloaded data to match expected format
@@ -225,6 +360,51 @@ for i in range(3):
 # In[ ]:
 
 
+def advanced_tokenizer(text):
+    """
+    Advanced tokenizer with better preprocessing for social media text.
+    Handles negation, contractions, and social media specific patterns.
+    """
+    import re
+    
+    # Convert to lowercase
+    text = str(text).lower()
+    
+    # Handle contractions
+    contractions = {
+        "n't": " not", "'re": " are", "'ve": " have", "'ll": " will",
+        "'d": " would", "'m": " am", "can't": "cannot", "won't": "will not"
+    }
+    for contraction, expansion in contractions.items():
+        text = text.replace(contraction, expansion)
+    
+    # Handle negation words by adding NOT_ prefix to following words
+    negation_words = ['not', 'no', 'never', 'none', 'nothing', 'nowhere', 'neither', 'nor', 'hardly', 'barely', 'scarcely']
+    words = text.split()
+    processed_words = []
+    negate_next = False
+    
+    for i, word in enumerate(words):
+        # Clean word first
+        clean_word = re.sub(r'[^\w\s]', '', word)
+        
+        if clean_word in negation_words:
+            processed_words.append(clean_word)
+            negate_next = True
+        elif negate_next and clean_word and clean_word not in ['and', 'or', 'but', 'however']:
+            processed_words.append(f"NOT_{clean_word}")
+            # Stop negation after a few words or punctuation
+            if i < len(words) - 1 and any(p in words[i+1] for p in '.!?;'):
+                negate_next = False
+        else:
+            if clean_word:
+                processed_words.append(clean_word)
+            # Reset negation on punctuation or conjunctions
+            if word in ['.', '!', '?', ';', 'but', 'however', 'although']:
+                negate_next = False
+    
+    return processed_words
+
 def simple_tokenizer(text):
     """
     Simple tokenizer that splits text into tokens.
@@ -243,7 +423,7 @@ def simple_tokenizer(text):
 
     return cleaned_tokens
 
-def build_vocabulary(texts, min_freq=2, max_vocab_size=10000):
+def build_vocabulary(texts, min_freq=2, max_vocab_size=10000, use_advanced_tokenizer=True):
     """
     Build vocabulary from texts with frequency filtering.
     Includes special tokens for padding and unknown words.
@@ -252,8 +432,10 @@ def build_vocabulary(texts, min_freq=2, max_vocab_size=10000):
 
     # Count token frequencies
     token_counts = Counter()
+    tokenizer = advanced_tokenizer if use_advanced_tokenizer else simple_tokenizer
+    
     for text in texts:
-        tokens = simple_tokenizer(text)
+        tokens = tokenizer(text)
         token_counts.update(tokens)
 
     # Start with special tokens
@@ -265,16 +447,18 @@ def build_vocabulary(texts, min_freq=2, max_vocab_size=10000):
             vocab[token] = len(vocab)
 
     print(f"Vocabulary size: {len(vocab)}")
+    print(f"Using {'advanced' if use_advanced_tokenizer else 'simple'} tokenizer")
     print(f"Most common tokens: {list(token_counts.most_common(10))}")
 
     return vocab
 
-def text_to_sequence(text, vocab, max_length=128):
+def text_to_sequence(text, vocab, max_length=128, use_advanced_tokenizer=True):
     """
     Convert text to sequence of token IDs.
     Handles unknown tokens and padding/truncation.
     """
-    tokens = simple_tokenizer(text)
+    tokenizer = advanced_tokenizer if use_advanced_tokenizer else simple_tokenizer
+    tokens = tokenizer(text)
 
     # Convert tokens to IDs
     sequence = []
@@ -294,13 +478,13 @@ def text_to_sequence(text, vocab, max_length=128):
 
     return sequence
 
-def tokenize_texts(texts, vocab, max_length=128):
+def tokenize_texts(texts, vocab, max_length=128, use_advanced_tokenizer=True):
     """
     Tokenize a list of texts and return as tensor.
     """
     sequences = []
     for text in texts:
-        sequence = text_to_sequence(text, vocab, max_length)
+        sequence = text_to_sequence(text, vocab, max_length, use_advanced_tokenizer)
         sequences.append(sequence)
 
     return torch.tensor(sequences, dtype=torch.long)
@@ -616,7 +800,7 @@ def prepare_data(texts, labels, vocab, batch_size=32):
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 def train_model_epochs(model, train_loader, test_loader, optimizer, loss_fn, device, 
-                      num_epochs=20, scheduler=None, patience=5):
+                      num_epochs=20, scheduler=None, patience=5, clip_gradients_fn=None):
     """
     Train model with comprehensive logging and early stopping.
     Implements best practices from the research literature.
@@ -647,6 +831,11 @@ def train_model_epochs(model, train_loader, test_loader, optimizer, loss_fn, dev
             outputs = model(data)
             loss = loss_fn(outputs, targets)
             loss.backward()
+            
+            # Apply gradient clipping if provided
+            if clip_gradients_fn:
+                clip_gradients_fn(model)
+            
             optimizer.step()
 
             train_loss += loss.item()
@@ -787,38 +976,158 @@ def plot_confusion_matrix(cm, classes=['Negative', 'Neutral', 'Positive'], title
 print("Evaluation system implemented successfully!")
 
 
-# ## 10. Comprehensive Model Comparison\n\nThis section implements the complete comparison pipeline, training all models and evaluating their performance. This is inspired by the baseline comparison approaches from the research literature.
+# ## 10. Comprehensive Model Comparison
 
-# In[ ]:
+# This section implements the complete comparison pipeline, training all models and evaluating their performance. This is inspired by the baseline comparison approaches from the research literature.
+
+# Prepare data for model comparison
+print("Preparing data for comprehensive model comparison...")
+
+# Clean and process the dataset
+df_clean = df.dropna(subset=['original_text', 'sentiment'])
+texts = df_clean['original_text'].astype(str).tolist()
+labels = [categorize_sentiment(s) for s in df_clean['sentiment'].tolist()]
+
+print(f"Dataset size: {len(texts)} samples")
+print(f"Label distribution: Negative={labels.count(0)}, Neutral={labels.count(1)}, Positive={labels.count(2)}")
+
+# Build vocabulary with advanced tokenization
+vocab = build_vocabulary(texts, min_freq=2, max_vocab_size=5000, use_advanced_tokenizer=True)
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    texts, labels, test_size=0.2, random_state=42, stratify=labels
+)
+
+print(f"Training set: {len(X_train)} samples")
+print(f"Test set: {len(X_test)} samples")
+
+# Prepare data loaders
+train_loader = prepare_data(X_train, y_train, vocab, batch_size=32)
+test_loader = prepare_data(X_test, y_test, vocab, batch_size=32)
+
+print("Data preparation complete!")
+print("Ready for comprehensive model comparison!")
 
 
-# Prepare data for model comparison\nprint("Preparing data for comprehensive model comparison...")\n\n# Clean and process the dataset\ndf_clean = df.dropna(subset=['original_text', 'sentiment'])\ntexts = df_clean['original_text'].astype(str).tolist()\nlabels = [categorize_sentiment(s) for s in df_clean['sentiment'].tolist()]\n\nprint(f"Dataset size: {len(texts)} samples")\nprint(f"Label distribution: Negative={labels.count(0)}, Neutral={labels.count(1)}, Positive={labels.count(2)}")\n\n# Build vocabulary\nvocab = build_vocabulary(texts, min_freq=2, max_vocab_size=5000)\n\n# Split data\nX_train, X_test, y_train, y_test = train_test_split(\n    texts, labels, test_size=0.2, random_state=42, stratify=labels\n)\n\nprint(f"Training set: {len(X_train)} samples")\nprint(f"Test set: {len(X_test)} samples")\n\n# Prepare data loaders\ntrain_loader = prepare_data(X_train, y_train, vocab, batch_size=32)\ntest_loader = prepare_data(X_test, y_test, vocab, batch_size=32)\n\nprint("Data preparation complete!")\nprint("Ready for comprehensive model comparison!")
+# Model configurations for comprehensive comparison with optimized hyperparameters
+models_config = {
+    'RNN': {'class': RNNModel, 'epochs': 25, 'lr': 1e-3, 'embed_dim': 128, 'hidden_dim': 128},
+    'LSTM': {'class': LSTMModel, 'epochs': 25, 'lr': 1e-3, 'embed_dim': 128, 'hidden_dim': 128},
+    'GRU': {'class': GRUModel, 'epochs': 25, 'lr': 1e-3, 'embed_dim': 128, 'hidden_dim': 128},
+    'Bidirectional_LSTM': {'class': BidirectionalLSTMModel, 'epochs': 30, 'lr': 5e-4, 'embed_dim': 128, 'hidden_dim': 128},
+    'Bidirectional_GRU': {'class': BidirectionalGRUModel, 'epochs': 30, 'lr': 5e-4, 'embed_dim': 128, 'hidden_dim': 128},
+    'LSTM_Attention': {'class': LSTMWithAttentionModel, 'epochs': 35, 'lr': 5e-4, 'embed_dim': 128, 'hidden_dim': 128},
+    'GRU_Attention': {'class': GRUWithAttentionModel, 'epochs': 35, 'lr': 5e-4, 'embed_dim': 128, 'hidden_dim': 128},
+    'Transformer': {'class': TransformerModel, 'epochs': 30, 'lr': 2e-4, 'embed_dim': 128, 'hidden_dim': 256, 'num_heads': 8, 'num_layers': 3}
+}
 
+# Run comprehensive comparison
+print("=" * 80)
+print("COMPREHENSIVE SENTIMENT ANALYSIS MODEL COMPARISON")
+print("=" * 80)
+print("This comparison implements insights from all five research papers:")
+print("1. Transformer architecture (Vaswani et al.)")
+print("2. Bidirectional processing (Huang et al.)")
+print("3. Self-attention mechanisms (Lin et al.)")
+print("4. Embedding foundations (Pennington et al.)")
+print("5. Efficient baselines (Joulin et al.)")
+print("=" * 80)
 
-# In[ ]:
+results = {}
 
+for model_name, config in models_config.items():
+    print(f"\n{'='*25} Training {model_name} {'='*25}")
+    
+    start_time = time.time()
+    
+    try:
+        # Initialize model with improved hyperparameters
+        if model_name == 'Transformer':
+            model = config['class'](
+                vocab_size=len(vocab), 
+                embed_dim=config['embed_dim'], 
+                num_heads=config['num_heads'],
+                hidden_dim=config['hidden_dim'], 
+                num_classes=3, 
+                num_layers=config['num_layers']
+            )
+        else:
+            model = config['class'](
+                vocab_size=len(vocab), 
+                embed_dim=config['embed_dim'], 
+                hidden_dim=config['hidden_dim'], 
+                num_classes=3
+            )
+        
+        model.to(device)
+        
+        # Setup training with improved optimization
+        optimizer = optim.Adam(model.parameters(), lr=config['lr'], weight_decay=1e-5)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode='max', factor=0.7, patience=5, min_lr=1e-6
+        )
+        
+        # Use class-weighted loss to handle imbalance
+        class_weights = torch.tensor([1.2, 1.0, 1.1], dtype=torch.float).to(device)  # slight rebalancing
+        loss_fn = nn.CrossEntropyLoss(weight=class_weights)
+        
+        # Add gradient clipping for stability
+        def clip_gradients(model, max_norm=1.0):
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
+        
+        # Train model
+        print(f"Training for {config['epochs']} epochs with learning rate {config['lr']}")
+        print(f"Model config: embed_dim={config['embed_dim']}, hidden_dim={config['hidden_dim']}")
+        history = train_model_epochs(
+            model, train_loader, test_loader, optimizer, loss_fn, device, 
+            num_epochs=config['epochs'], scheduler=scheduler, patience=8,
+            clip_gradients_fn=clip_gradients
+        )
+        
+        # Evaluate model
+        eval_results = evaluate_model_comprehensive(model, test_loader, device)
+        training_time = time.time() - start_time
+        
+        # Store results
+        results[model_name] = {
+            'accuracy': eval_results['accuracy'],
+            'f1_score': eval_results['f1_score'],
+            'precision': eval_results['precision'],
+            'recall': eval_results['recall'],
+            'training_time': training_time,
+            'epochs_trained': config['epochs'],
+            'history': history,
+            'confusion_matrix': eval_results['confusion_matrix']
+        }
+        
+        print(f"✅ {model_name} completed:")
+        print(f"   Accuracy: {eval_results['accuracy']:.4f}")
+        print(f"   F1 Score: {eval_results['f1_score']:.4f}")
+        print(f"   Training Time: {training_time:.1f}s")
+        
+    except Exception as e:
+        print(f"❌ Error training {model_name}: {e}")
+        results[model_name] = {
+            'accuracy': 0.0, 'f1_score': 0.0, 'precision': 0.0, 'recall': 0.0,
+            'training_time': 0.0, 'epochs_trained': 0, 'history': None,
+            'confusion_matrix': None
+        }
 
-# Model configurations for comprehensive comparison\nmodels_config = {\n    'RNN': {'class': RNNModel, 'epochs': 15, 'lr': 1e-3},\n    'LSTM': {'class': LSTMModel, 'epochs': 15, 'lr': 1e-3},\n    'GRU': {'class': GRUModel, 'epochs': 15, 'lr': 1e-3},\n    'Bidirectional_LSTM': {'class': BidirectionalLSTMModel, 'epochs': 20, 'lr': 1e-3},\n    'Bidirectional_GRU': {'class': BidirectionalGRUModel, 'epochs': 20, 'lr': 1e-3},\n    'LSTM_Attention': {'class': LSTMWithAttentionModel, 'epochs': 20, 'lr': 1e-3},\n    'GRU_Attention': {'class': GRUWithAttentionModel, 'epochs': 20, 'lr': 1e-3},\n    'Transformer': {'class': TransformerModel, 'epochs': 15, 'lr': 1e-4}\n}\n\n# Run comprehensive comparison\nprint("=" * 80)\nprint("COMPREHENSIVE SENTIMENT ANALYSIS MODEL COMPARISON")\nprint("=" * 80)\nprint("This comparison implements insights from all five research papers:")\nprint("1. Transformer architecture (Vaswani et al.)")\nprint("2. Bidirectional processing (Huang et al.)")\nprint("3. Self-attention mechanisms (Lin et al.)")\nprint("4. Embedding foundations (Pennington et al.)")\nprint("5. Efficient baselines (Joulin et al.)")\nprint("=" * 80)\n\nresults = {}\n\nfor model_name, config in models_config.items():\n    print(f"\n{'='*25} Training {model_name} {'='*25}")\n    \n    start_time = time.time()\n    \n    try:\n        # Initialize model\n        if model_name == 'Transformer':\n            model = config['class'](\n                vocab_size=len(vocab), embed_dim=64, num_heads=4,\n                hidden_dim=128, num_classes=3, num_layers=2\n            )\n        else:\n            model = config['class'](\n                vocab_size=len(vocab), embed_dim=64, \n                hidden_dim=64, num_classes=3\n            )\n        \n        model.to(device)\n        \n        # Setup training\n        optimizer = optim.Adam(model.parameters(), lr=config['lr'])\n        scheduler = optim.lr_scheduler.ReduceLROnPlateau(\n            optimizer, mode='max', factor=0.5, patience=3\n        )\n        loss_fn = nn.CrossEntropyLoss()\n        \n        # Train model\n        print(f"Training for {config['epochs']} epochs with learning rate {config['lr']}")\n        history = train_model_epochs(\n            model, train_loader, test_loader, optimizer, loss_fn, device, \n            num_epochs=config['epochs'], scheduler=scheduler\n        )\n        \n        # Evaluate model\n        eval_results = evaluate_model_comprehensive(model, test_loader, device)\n        training_time = time.time() - start_time\n        \n        # Store results\n        results[model_name] = {\n            'accuracy': eval_results['accuracy'],\n            'f1_score': eval_results['f1_score'],\n            'precision': eval_results['precision'],\n            'recall': eval_results['recall'],\n            'training_time': training_time,\n            'epochs_trained': config['epochs'],\n            'history': history,\n            'confusion_matrix': eval_results['confusion_matrix']\n        }\n        \n        print(f"✅ {model_name} completed:")\n        print(f"   Accuracy: {eval_results['accuracy']:.4f}")\n        print(f"   F1 Score: {eval_results['f1_score']:.4f}")\n        print(f"   Training Time: {training_time:.1f}s")\n        \n    except Exception as e:\n        print(f"❌ Error training {model_name}: {e}")\n        results[model_name] = {\n            'accuracy': 0.0, 'f1_score': 0.0, 'precision': 0.0, 'recall': 0.0,\n            'training_time': 0.0, 'epochs_trained': 0, 'history': None,\n            'confusion_matrix': None\n        }\n\nprint("\nModel training completed!")\nprint("Proceeding to results analysis...")
+print("\nModel training completed!")
+print("Proceeding to results analysis...")
 
 
 # ## 11. Results Analysis and Visualization\n\nThis section provides comprehensive analysis of the model comparison results, including performance visualizations and detailed insights based on the research literature.
 
-# In[ ]:
-
 
 # Display comprehensive results\nprint("\n" + "=" * 80)\nprint("FINAL RESULTS ANALYSIS")\nprint("=" * 80)\n\n# Create results DataFrame for analysis\nresults_df = pd.DataFrame.from_dict(results, orient='index')\n\n# Sort by F1 score\nresults_df = results_df.sort_values('f1_score', ascending=False)\n\nprint(f"{'Model':<20} {'Accuracy':<10} {'F1 Score':<10} {'Precision':<11} {'Recall':<8} {'Time (s)':<10}")\nprint("-" * 85)\n\nfor model_name, row in results_df.iterrows():\n    print(f"{model_name:<20} {row['accuracy']:<10.4f} {row['f1_score']:<10.4f} "\n          f\"{row['precision']:<11.4f} {row['recall']:<8.4f} {row['training_time']:<10.1f}\")\n\n# Find best models\nbest_accuracy = results_df.iloc[0]\nfastest_model = results_df.loc[results_df['training_time'].idxmin()]\n\nprint(f"\n🏆 Best Overall Performance: {results_df.index[0]} with F1 Score: {results_df.iloc[0]['f1_score']:.4f}")\nprint(f"⚡ Fastest Training: {fastest_model.name} trained in {fastest_model['training_time']:.1f} seconds")\n\n# Save results to CSV\nresults_df.to_csv('model_comparison_results.csv')\nprint(f"\n💾 Results saved to model_comparison_results.csv")
-
-
-# In[ ]:
 
 
 # Create comprehensive visualizations\nplt.figure(figsize=(15, 10))\n\n# Performance comparison\nplt.subplot(2, 3, 1)\nmodels = list(results_df.index)\naccuracies = results_df['accuracy'].values\nplt.bar(models, accuracies, color='skyblue')\nplt.title('Model Accuracy Comparison')\nplt.xlabel('Model')\nplt.ylabel('Accuracy')\nplt.xticks(rotation=45)\nplt.grid(True, alpha=0.3)\n\nplt.subplot(2, 3, 2)\nf1_scores = results_df['f1_score'].values\nplt.bar(models, f1_scores, color='lightgreen')\nplt.title('Model F1 Score Comparison')\nplt.xlabel('Model')\nplt.ylabel('F1 Score')\nplt.xticks(rotation=45)\nplt.grid(True, alpha=0.3)\n\nplt.subplot(2, 3, 3)\ntraining_times = results_df['training_time'].values\nplt.bar(models, training_times, color='salmon')\nplt.title('Training Time Comparison')\nplt.xlabel('Model')\nplt.ylabel('Time (seconds)')\nplt.xticks(rotation=45)\nplt.grid(True, alpha=0.3)\n\n# Performance vs Time scatter plot\nplt.subplot(2, 3, 4)\nplt.scatter(training_times, f1_scores, s=100, alpha=0.7)\nfor i, model in enumerate(models):\n    plt.annotate(model, (training_times[i], f1_scores[i]), \n                xytext=(5, 5), textcoords='offset points', fontsize=8)\nplt.xlabel('Training Time (seconds)')\nplt.ylabel('F1 Score')\nplt.title('Performance vs Training Time')\nplt.grid(True, alpha=0.3)\n\n# Model architecture comparison\nplt.subplot(2, 3, 5)\nmodel_types = ['Base', 'Base', 'Base', 'Bidirectional', 'Bidirectional', \n               'Attention', 'Attention', 'Transformer']\ntype_performance = {}\nfor i, model_type in enumerate(model_types):\n    if model_type not in type_performance:\n        type_performance[model_type] = []\n    type_performance[model_type].append(f1_scores[i])\n\navg_performance = [np.mean(type_performance[t]) for t in type_performance.keys()]\nplt.bar(type_performance.keys(), avg_performance, color='purple', alpha=0.7)\nplt.title('Average Performance by Architecture Type')\nplt.xlabel('Architecture Type')\nplt.ylabel('Average F1 Score')\nplt.xticks(rotation=45)\nplt.grid(True, alpha=0.3)\n\n# Heatmap of all metrics\nplt.subplot(2, 3, 6)\nmetrics_data = results_df[['accuracy', 'f1_score', 'precision', 'recall']].T\nsns.heatmap(metrics_data, annot=True, fmt='.3f', cmap='YlOrRd',\n            xticklabels=models, yticklabels=['Accuracy', 'F1', 'Precision', 'Recall'])\nplt.title('All Metrics Heatmap')\nplt.xticks(rotation=45)\n\nplt.tight_layout()\nplt.savefig('comprehensive_model_comparison.png', dpi=300, bbox_inches='tight')\nplt.show()\n\nprint("📊 Comprehensive visualization completed!")\nprint("📁 Visualization saved as 'comprehensive_model_comparison.png'")
 
 
 # ## 12. Research Insights and Literature-Based Analysis\n\nBased on our comprehensive comparison and the research literature, we can draw several important insights about sentiment analysis model performance.
-
-# In[ ]:
-
 
 print("=" * 80)
 print("RESEARCH INSIGHTS AND LITERATURE-BASED ANALYSIS")
@@ -832,34 +1141,43 @@ print("1. TRANSFORMER ARCHITECTURE (Vaswani et al., 2017):")
 if 'Transformer' in results:
     transformer_f1 = results['Transformer']['f1_score']
     avg_rnn_f1 = np.mean([results['RNN']['f1_score'], results['LSTM']['f1_score'], results['GRU']['f1_score']])
-    improvement = ((transformer_f1 - avg_rnn_f1) / avg_rnn_f1) * 100
-    print(f"   • Transformer F1: {transformer_f1:.4f} vs Avg RNN F1: {avg_rnn_f1:.4f}")
-    print(f"   • Performance improvement: {improvement:+.1f}%")
-    print(f"   • ✅ Validates paper's claim about self-attention effectiveness")
+    if avg_rnn_f1 > 0:
+        improvement = ((transformer_f1 - avg_rnn_f1) / avg_rnn_f1) * 100
+        print(f"   • Transformer F1: {transformer_f1:.4f} vs Avg RNN F1: {avg_rnn_f1:.4f}")
+        print(f"   • Performance improvement: {improvement:+.1f}%")
+        print(f"   • ✅ Validates paper's claim about self-attention effectiveness")
+    else:
+        print(f"   • ⚠️  Unable to calculate improvement due to zero baseline performance")
 
 print("\n2. BIDIRECTIONAL PROCESSING (Huang et al., 2015):")
 if 'LSTM' in results and 'Bidirectional_LSTM' in results:
     lstm_f1 = results['LSTM']['f1_score']
     bilstm_f1 = results['Bidirectional_LSTM']['f1_score']
-    improvement = ((bilstm_f1 - lstm_f1) / lstm_f1) * 100
-    print(f"   • LSTM F1: {lstm_f1:.4f} vs Bi-LSTM F1: {bilstm_f1:.4f}")
-    print(f"   • Bidirectional improvement: {improvement:+.1f}%")
-    if improvement > 0:
-        print(f"   • ✅ Confirms bidirectional processing benefits")
+    if lstm_f1 > 0:
+        improvement = ((bilstm_f1 - lstm_f1) / lstm_f1) * 100
+        print(f"   • LSTM F1: {lstm_f1:.4f} vs Bi-LSTM F1: {bilstm_f1:.4f}")
+        print(f"   • Bidirectional improvement: {improvement:+.1f}%")
+        if improvement > 0:
+            print(f"   • ✅ Confirms bidirectional processing benefits")
+        else:
+            print(f"   • ⚠️  Limited improvement may indicate dataset characteristics")
     else:
-        print(f"   • ⚠️  Limited improvement may indicate dataset characteristics")
+        print(f"   • ⚠️  Unable to calculate improvement due to zero baseline performance")
 
 print("\n3. ATTENTION MECHANISMS (Lin et al., 2017):")
 if 'LSTM' in results and 'LSTM_Attention' in results:
     lstm_f1 = results['LSTM']['f1_score']
     lstm_att_f1 = results['LSTM_Attention']['f1_score']
-    improvement = ((lstm_att_f1 - lstm_f1) / lstm_f1) * 100
-    print(f"   • LSTM F1: {lstm_f1:.4f} vs LSTM+Attention F1: {lstm_att_f1:.4f}")
-    print(f"   • Attention improvement: {improvement:+.1f}%")
-    if improvement > 0:
-        print(f"   • ✅ Supports attention-based sentence embeddings")
+    if lstm_f1 > 0:
+        improvement = ((lstm_att_f1 - lstm_f1) / lstm_f1) * 100
+        print(f"   • LSTM F1: {lstm_f1:.4f} vs LSTM+Attention F1: {lstm_att_f1:.4f}")
+        print(f"   • Attention improvement: {improvement:+.1f}%")
+        if improvement > 0:
+            print(f"   • ✅ Supports attention-based sentence embeddings")
+        else:
+            print(f"   • ⚠️  May need larger datasets to see attention benefits")
     else:
-        print(f"   • ⚠️  May need larger datasets to see attention benefits")
+        print(f"   • ⚠️  Unable to calculate improvement due to zero baseline performance")
 
 print("\n4. MODEL COMPLEXITY vs PERFORMANCE:")
 complexity_order = ['RNN', 'LSTM', 'GRU', 'Bidirectional_LSTM',
@@ -868,10 +1186,13 @@ available_models = [m for m in complexity_order if m in results]
 if len(available_models) >= 3:
     simple_f1 = results[available_models[0]]['f1_score']
     complex_f1 = results[available_models[-1]]['f1_score']
-    improvement = ((complex_f1 - simple_f1) / simple_f1) * 100
-    print(f"   • Simplest model ({available_models[0]}): {simple_f1:.4f}")
-    print(f"   • Most complex ({available_models[-1]}): {complex_f1:.4f}")
-    print(f"   • Complexity benefit: {improvement:+.1f}%")
+    if simple_f1 > 0:
+        improvement = ((complex_f1 - simple_f1) / simple_f1) * 100
+        print(f"   • Simplest model ({available_models[0]}): {simple_f1:.4f}")
+        print(f"   • Most complex ({available_models[-1]}): {complex_f1:.4f}")
+        print(f"   • Complexity benefit: {improvement:+.1f}%")
+    else:
+        print(f"   • ⚠️  Unable to calculate complexity benefit due to zero baseline performance")
 
 print("\n5. EFFICIENCY ANALYSIS (Inspired by Joulin et al., 2016):")
 efficiency_scores = {}
@@ -888,9 +1209,6 @@ if efficiency_scores:
 
 
 # ## 13. Conclusions and Recommendations\n\nThis comprehensive analysis provides actionable insights for sentiment analysis model selection and highlights the practical applications of key research papers.
-
-# In[ ]:
-
 
 print("\n" + "=" * 80)
 print("CONCLUSIONS AND RECOMMENDATIONS")
