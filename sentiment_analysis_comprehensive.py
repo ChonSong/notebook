@@ -1208,11 +1208,17 @@ if efficiency_scores:
     print(f"   • ✅ Validates importance of simple, efficient baselines")
 
 
-# ## 13. Conclusions and Recommendations\n\nThis comprehensive analysis provides actionable insights for sentiment analysis model selection and highlights the practical applications of key research papers.
+# ## 13. Conclusions and Recommendations
+
+# This comprehensive analysis provides actionable insights for sentiment analysis model selection and highlights the practical applications of key research papers.
 
 print("\n" + "=" * 80)
 print("CONCLUSIONS AND RECOMMENDATIONS")
 print("=" * 80)
+
+# Create results DataFrame for final analysis
+results_df = pd.DataFrame.from_dict(results, orient='index')
+results_df = results_df.sort_values('f1_score', ascending=False)
 
 # Get top 3 models
 top_models = results_df.head(3)
