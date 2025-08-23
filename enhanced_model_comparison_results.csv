@@ -1,0 +1,10 @@
+,accuracy,f1_score,precision,recall,training_time,epochs_trained,confusion_matrix
+LSTM_Attention_Enhanced,1.0,1.0,1.0,1.0,28.823211669921875,25,"[[40  0  0]
+ [ 0 40  0]
+ [ 0  0 40]]"
+GRU_Attention_Enhanced,1.0,1.0,1.0,1.0,38.22443985939026,25,"[[40  0  0]
+ [ 0 40  0]
+ [ 0  0 40]]"
+Transformer_Stable,1.0,1.0,1.0,1.0,20.754000186920166,30,"[[40  0  0]
+ [ 0 40  0]
+ [ 0  0 40]]"
